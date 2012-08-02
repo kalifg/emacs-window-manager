@@ -2849,6 +2849,7 @@ string object to insert the imenu buffer."
 (defun e2wm:dp-code-sub-toggle-command ()
   (interactive)
   (wlf:toggle (e2wm:pst-get-wm) 'sub)
+  (e2wm:dp-code-navi-main-command)
   (e2wm:pst-update-windows))
 (defun e2wm:dp-code-navi-main-command ()
   (interactive)

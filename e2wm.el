@@ -172,14 +172,15 @@
   (lambda (buf)
     (string-match "\\*\\(Help\\|info\\|w3m\\|WoMan\\)" (buffer-name buf)))
   "Retrun non-nil, if the buffer is a document buffer.")
-(defvar e2wm:c-blank-buffer
-      (let ((buf (get-buffer-create " *e2wm:blank*")))
-        (with-current-buffer buf
-          (setq buffer-read-only nil)
-          (buffer-disable-undo buf)
-          (erase-buffer)
-          (setq buffer-read-only t)) buf)
-      "Blank buffer.")
+
+(defun e2wm:c-blank-buffer ()
+  (let ((buf (get-buffer-create " *e2wm:blank*")))
+    (with-current-buffer buf
+      (setq buffer-read-only nil)
+      (buffer-disable-undo buf)
+      (erase-buffer)
+      (setq buffer-read-only t)) 
+    buf))
 
 (defvar e2wm:prefix-key "C-c ; " "Prefix key")
 
@@ -572,7 +573,7 @@ If no buffer is found, return BUFFER."
   "Return the main buffer that should be display as the current
 editing buffer."
   (e2wm:aif (e2wm:history-get)
-      (car it) e2wm:c-blank-buffer))
+      (car it) (e2wm:c-blank-buffer)))
 
 (defun e2wm:managed-p (&optional frame)
   "Return t, if e2wm manages the current frame."
@@ -1321,7 +1322,7 @@ Called via `kill-buffer-hook'."
                   (e2wm:history-add buf))
                 (wlf:set-buffer wm wname buf)))
          (main-wname 
-          (wlf:set-buffer wm main-wname e2wm:c-blank-buffer)))))
+          (wlf:set-buffer wm main-wname (e2wm:c-blank-buffer))))))
     ;; remove it from the history list
     (e2wm:history-delete (current-buffer))
     (when this-command
@@ -3289,14 +3290,14 @@ string object to insert the imenu buffer."
         do 
         (cond
          ((null plugin)
-          (plist-put opt ':buffer e2wm:c-blank-buffer))
+          (plist-put opt ':buffer (e2wm:c-blank-buffer)))
          ((symbolp plugin)
           (plist-put opt ':plugin plugin))
          ((consp plugin)
           (plist-put opt ':plugin (car plugin))
           (nconc opt (cdr plugin)))
          (t
-          (plist-put opt ':buffer e2wm:c-blank-buffer)))
+          (plist-put opt ':buffer (e2wm:c-blank-buffer))))
         (incf cnt))
   wm)
 
@@ -3529,7 +3530,7 @@ string object to insert the imenu buffer."
         do (plist-put 
             opt ':buffer
             (e2wm:aif (nth cnt buffers) 
-                it e2wm:c-blank-buffer))
+                it (e2wm:c-blank-buffer)))
         (incf cnt))
   wm)
 

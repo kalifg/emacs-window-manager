@@ -859,6 +859,7 @@ are created."
          ("prefix n"   . e2wm:pst-history-down-command)
          ("prefix p"   . e2wm:pst-history-up-command)
          ("prefix <DEL>" . e2wm:pst-change-prev-pst-command)
+         ("prefix t" . e2wm:pst-window-toggle-main-sub)
          ) e2wm:prefix-key)
       "Common key map for all perspectives. (See `e2wm:pst-change-keymap')")
 
@@ -939,6 +940,24 @@ If the perspective has no `main' window, this function does nothing."
         (wm (e2wm:pst-get-wm)))
     (when (and main (wlf:window-name-p wm main))
       (wlf:select wm main))))
+
+(defun e2wm:pst-window-select-sub ()
+  "Select the `sub' window."
+  (let ((sub (wlf:get-window (e2wm:pst-get-wm) 'sub)))
+    (select-window sub)))
+
+(defun e2wm:pst-window-toggle-main-sub ()
+  "Select the `sub' window if we're in the main, select `main' otherwise."
+  (interactive)
+  (let ((main (e2wm:$pst-main (e2wm:pst-get-instance)))
+        (wm (e2wm:pst-get-wm)))
+    (if (and
+         main
+         (wlf:window-name-p wm main)
+         (eq (wlf:get-window (e2wm:pst-get-wm) 'main) (selected-window)))
+        (e2wm:pst-window-select-sub)
+      (e2wm:pst-window-select-main))))
+  
 
 (defun e2wm:pst-window-toggle (window-name &optional selectp next-window)
   "Toggle visibility of the window specified by WINDOW-NAME.

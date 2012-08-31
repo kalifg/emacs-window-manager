@@ -1506,6 +1506,25 @@ management. For window-layout.el.")
     ad-do-it))
   (e2wm:message "#SET-WINDOW-CONFIGURATION <-- %s" ad-return-value))
 
+(defun e2wm:make-advice-name (function)
+  (intern (concat "make-popup-" (symbol-name function))))
+
+(defmacro e2wm:make-function-popup (&rest functions)
+  `(progn
+     ,@(mapcar (lambda (function)
+                 `(defadvice ,function (around ,(e2wm:make-advice-name function) activate)
+                    (flet ((switch-to-buffer (buffer-or-name) (pop-to-buffer buffer-or-name)))
+                      ad-do-it)))
+               functions)))
+
+;; TODO: check to make sure advice exists
+(defmacro e2wm:unmake-function-popup (&rest functions)
+  `(progn
+     ,@(mapcar (lambda (function)
+                 `(ad-remove-advice ',function 'around ',(e2wm:make-advice-name function)))
+               functions)))
+
+
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; ### Plugin Framework
@@ -1777,6 +1796,15 @@ management. For window-layout.el.")
 (e2wm:plugin-register 'history-list 
                      "History List"
                      'e2wm:def-plugin-history-list)
+
+(defun e2wm:def-plugin-history-jump-to-number (number)
+  "Jump to the item in the history with given number."
+  (interactive "nWhich item? ")
+  (when (e2wm:managed-p)
+    (let ((buf (nth (1- number) (e2wm:history-get))))
+      (when (and buf (buffer-live-p buf))
+        (e2wm:history-add buf)
+        (e2wm:pst-show-history-main)))))
 
 ;;; history-list2 / バッファ・履歴一覧 (two専用)
 ;;;--------------------------------------------------
@@ -2154,7 +2182,9 @@ string object to insert the imenu buffer."
         (buffer-disable-undo buf)))
     (let (proc)
       (condition-case err
-          (setq proc (start-process "WM:top" tmpbuf "top" "-b" "-n" "1"))
+          (if (string-equal system-type "darwin")
+              (setq proc (start-process "WM:top" tmpbuf "top" "-l" "1"))
+            (setq proc (start-process "WM:top" tmpbuf "top" "-b" "-n" "1")))
         (nil 
          (with-current-buffer buf
            (erase-buffer)

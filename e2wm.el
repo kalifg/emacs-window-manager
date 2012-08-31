@@ -860,6 +860,7 @@ are created."
          ("prefix p"   . e2wm:pst-history-up-command)
          ("prefix <DEL>" . e2wm:pst-change-prev-pst-command)
          ("prefix t" . e2wm:pst-window-toggle-main-sub)
+         ("prefix h" . e2wm:def-plugin-history-jump-to-number)
          ) e2wm:prefix-key)
       "Common key map for all perspectives. (See `e2wm:pst-change-keymap')")
 

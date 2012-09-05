@@ -2764,13 +2764,15 @@ string object to insert the imenu buffer."
 (defun e2wm:def-plugin-open (frame wm winfo)
   (let* ((plugin-args (wlf:window-option-get winfo :plugin-args))
          (buffer-name (plist-get plugin-args ':buffer))
-         (command (plist-get plugin-args ':command)) buf)
+         (command (plist-get plugin-args ':command))
+         (command-args (plist-get plugin-args ':command-args))
+         buf)
     (unless (and command buffer-name)
       (error "e2wm:plugin open: arguments can not be nil. Check the options."))
     (setq buf (get-buffer buffer-name))
     (unless buf
       (with-selected-window (wlf:get-window wm (wlf:window-name winfo))
-        (setq buf (funcall command))))
+        (setq buf (apply command command-args))))
     (when buf
       (wlf:set-buffer wm (wlf:window-name winfo) buf))))
 
